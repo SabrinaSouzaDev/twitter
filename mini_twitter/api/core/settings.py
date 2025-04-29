@@ -27,7 +27,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+INSTALLED_APPS = [
+    # apps padrão do Django
+    'rest_framework',
+    'drf_spectacular',  # Adicione isso
+]
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  # Adicione isso
+}
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,6 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api.accounts',
+    'api.posts',
+    'api.follows',
+    'api.feeds',
 ]
 
 MIDDLEWARE = [

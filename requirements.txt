@@ -16,4 +16,6 @@ uritemplate==4.1.1
 gunicorn
 djangorestframework
 djangorestframework-simplejwt
-
+django-environ
+drf-spectacular
+django_redis
