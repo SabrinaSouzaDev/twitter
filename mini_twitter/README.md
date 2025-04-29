@@ -7,7 +7,7 @@ Este é um projeto simples que simula funcionalidades básicas de uma rede socia
 ```
 mini-twitter/
 ├── .github/workflows/       # CI/CD workflows (GitHub Actions)
-├── api/                     # Main application code
+├── apps/                     # Main application code
 │   ├── accounts/            # User authentication app
 │   ├── posts/               # Posts functionality
 │   ├── feeds/               # Feed generation
