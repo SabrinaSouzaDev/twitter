@@ -19,7 +19,7 @@ schema_view = get_schema_view(
     openapi.Info(
         title="Mini Twitter API",
         default_version='v1',
-        description="Documentação da API do projeto Mini Twitter",
+        description="Documentação da API do projeto Mini Twitter. API de seguidores, usuários e autenticação JWT",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@minitwitter.local"),
         license=openapi.License(name="MIT License"),
@@ -36,9 +36,10 @@ urlpatterns = [
     path('apps/auth/register/', UserCreateView.as_view(), name='register'),
     path('apps/auth/login/', CustomTokenObtainPairView.as_view(), name='login'),
     path('apps/auth/me/', UserDetailView.as_view(), name='me'),
-    
+    # Feed
     # Follows
     path('follows/', include('apps.follows.urls')),
+    # swagger
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
      
 ]

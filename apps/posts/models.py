@@ -23,6 +23,9 @@ class PostLike(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['post', 'user'], name='unique_post_like')
-        ]
+    constraints = [
+        models.UniqueConstraint(fields=['post', 'user'], name='unique_post_like')
+    ]
+
+def __str__(self):
+    return f"{self.user.username}: {self.content[:30]}"

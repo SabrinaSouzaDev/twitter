@@ -2,8 +2,8 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from django.urls import reverse
 
-from api.posts.models import Post
 from apps.accounts.models import User
+from apps.posts.models import Post
 
 class PostTests(TestCase):
     def setUp(self):
