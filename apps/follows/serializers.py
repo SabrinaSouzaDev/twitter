@@ -11,4 +11,4 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = '__all__'
+        fields = ['id', 'follower', 'followed', 'created_at']

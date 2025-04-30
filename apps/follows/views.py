@@ -5,11 +5,14 @@ from django.shortcuts import get_object_or_404
 from apps.accounts.models import User
 from apps.accounts.serializers import UserSerializer
 from apps.follows.models import Follow
+from apps.follows.serializers import FollowSerializer
 
 
 class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Follow.objects.all()
+    def get_serializer_class(self):
+        return FollowSerializer
 
     def create(self, request, *args, **kwargs):
         followed_id = request.data.get('user_id')
@@ -17,7 +20,7 @@ class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
         
         if request.user == followed:
             return Response(
-                {"error": "You cannot follow yourself"},
+                 {"error": "Você não pode seguir a si mesmo."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -28,14 +31,12 @@ class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
         
         if not created:
             return Response(
-                {"error": "Already following this user"},
+              {"error": "Você já está seguindo esse usuário."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-        return Response(
-            {"status": "successfully followed"},
-            status=status.HTTP_201_CREATED
-        )
+
+        serializer = FollowSerializer(follow)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         follow = get_object_or_404(
