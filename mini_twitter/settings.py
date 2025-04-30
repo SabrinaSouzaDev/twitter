@@ -9,22 +9,17 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
 from pathlib import Path
 import environ
 import os
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 env = environ.Env()
-# Set the default value for the environment variable
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-
+environ.Env.read_env()
+BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 {
     "python.analysis.extraPaths": [
@@ -35,7 +30,7 @@ DEBUG = True
     ]
 }
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_yasg',
      # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
@@ -55,6 +51,15 @@ INSTALLED_APPS = [
     'apps.follows',
     'apps.feeds',
 ]
+
+# Configurações adicionais
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -97,7 +102,7 @@ REST_FRAMEWORK = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/1",
+        "LOCATION": f"redis://{env('REDIS_HOST')}:{env('REDIS_PORT')}/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "SOCKET_CONNECT_TIMEOUT": 5,
@@ -112,11 +117,11 @@ AUTH_USER_MODEL = 'accounts.User'  # Defina explicitamente seu modelo de usuári
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': env('POSTGRES_PORT'),
+        'NAME': env('POSTGRES_DB', default='mini_twitter_db'),  # Nome do banco de dados
+        'USER': env('POSTGRES_USER', default='sabrina'),  # Usuário do banco de dados
+        'PASSWORD': env('POSTGRES_PASSWORD', default='BackLog1023'),  # Senha
+        'HOST': env('POSTGRES_HOST', default='localhost'),  # Host (localhost ou IP)
+        'PORT': env('POSTGRES_PORT', default='5432'),  # Porta padrão do PostgreSQL
     }
 }
 

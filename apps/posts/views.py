@@ -2,14 +2,13 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.posts.models import Post
+from apps.posts.models import Post, PostLike
 from apps.posts.serializers import PostSerializer
 from mini_twitter.pagination import StandardResultsSetPagination
 
 
-
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+    queryset = Post.objects.select_related('author').all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = StandardResultsSetPagination
@@ -20,7 +19,7 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post', 'delete'])
     def like(self, request, pk=None):
         post = self.get_object()
-        
+
         if request.method == 'POST':
             like, created = PostLike.objects.get_or_create(
                 post=post,
@@ -32,7 +31,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             return Response({'status': 'liked'}, status=status.HTTP_201_CREATED)
-        
+
         elif request.method == 'DELETE':
             try:
                 like = PostLike.objects.get(post=post, user=request.user)

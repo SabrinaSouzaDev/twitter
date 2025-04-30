@@ -1,6 +1,6 @@
 from django.db import models
 
-from apps.accounts.admin import User
+from apps.accounts.models import User
 
 
 class Post(models.Model):
@@ -22,5 +22,7 @@ class PostLike(models.Model):
     user = models.ForeignKey(User, related_name='liked_posts', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ('post', 'user')
+class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['post', 'user'], name='unique_post_like')
+        ]

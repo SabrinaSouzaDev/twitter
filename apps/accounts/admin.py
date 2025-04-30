@@ -21,4 +21,3 @@ class FollowingInline(admin.TabularInline):
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     inlines = [FollowersInline, FollowingInline]
-    # ... outras configurações do admin
