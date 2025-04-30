@@ -16,9 +16,9 @@ class FeedView(generics.ListAPIView):
         queryset = cache.get(cache_key)
 
         if queryset is None:
-            following = user.following.values_list('to_user', flat=True)
+            following_ids = user.following.values_list('followed_id', flat=True)
             queryset = Post.objects.filter(
-                Q(author__id__in=following) | Q(author=user)
+                Q(author__id__in=following_ids) | Q(author=user)
             ).order_by('-created_at')
             cache.set(cache_key, queryset, timeout=60 * 5)  # Cache for 5 minutes
 
