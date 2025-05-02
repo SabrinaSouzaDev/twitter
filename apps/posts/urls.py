@@ -10,5 +10,5 @@ router.register(r'posts', PostViewSet)
 
 # Incluindo as URLs do router
 urlpatterns = [
-    path('', include(router.urls)),  # Registra todas as URLs do viewset
+    path('', include(router.urls)),
 ]

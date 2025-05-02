@@ -29,46 +29,53 @@ MINI-TWITTER ERD
 ───────────────────────────────────────────────────────────────────
 
 USER
-+─────────────────+──────────────────+────────────────────────────+
-| PK | id         | INT (auto)       | Primary Key                |
-|    | username   | VARCHAR(150)     | Unique, not null           |
-|    | email      | VARCHAR(254)     | Unique, not null           |
-|    | password   | VARCHAR(128)     | Hashed, not null           |
-|    | bio        | TEXT             | Optional                   |
-|    | created_at | DATETIME         | auto_now_add               |
-|    | updated_at | DATETIME         | auto_now                   |
-+─────────────────+──────────────────+────────────────────────────+
-       ▲                                   ▲
-       │                                   │
-       │ 1                             *   │
-       │                                   │
-       │                                  ╱│╲
-POST  ╱│╲                           FOLLOW
-     │   │                         +──────+──────+
-     │   │                         | PK | id     |
-     *   1                         | FK | from_user → USER.id
-     │   │                         | FK | to_user → USER.id |
-     │   │                         | created_at            |
-     ▼   ▼                         +──────+──────+
-+─────────────────+──────────────────+────────────────────────────+
-| PK | id         | INT (auto)       | Primary Key                |
-| FK | author_id  | INT              | USER.id (CASCADE on delete)|
-|    | content    | TEXT             | Not null                   |
-|    | image      | VARCHAR(100)     | Optional path              |
-|    | created_at | DATETIME         | auto_now_add               |
-|    | updated_at | DATETIME         | auto_now                   |
-+─────────────────+──────────────────+────────────────────────────+
-             ╲│╱
-              *
-              │
-              │
-              ▼
-      POST_LIKES (junction table)
-      +──────────+──────────+
-      | PK,FK | post_id → POST.id
-      | PK,FK | user_id → USER.id
-      | created_at
-      +──────────+──────────+
++-------------+--------------+-------------------------------+
+| PK | id     | SERIAL       | Primary Key                  |
+|    | username | VARCHAR(150) | Unique, Not Null            |
+|    | email   | VARCHAR(254) | Unique, Not Null            |
+|    | password | VARCHAR(128) | Hashed, Not Null            |
+|    | bio     | TEXT         | Optional                     |
+|    | created_at | TIMESTAMP | auto_now_add                |
+|    | updated_at | TIMESTAMP | auto_now                    |
++-------------+--------------+-------------------------------+
+
+       ▲
+       │
+       │ 1
+       │
+       │
+       ▼
+POST
++-------------+--------------+---------------------------------------------+
+| PK | id     | SERIAL       | Primary Key                                |
+| FK | author_id | INTEGER   | ForeignKey → USER(id), CASCADE on delete  |
+|    | content | TEXT         | Not Null                                  |
+|    | image   | VARCHAR(255) | Optional (image path)                     |
+|    | created_at | TIMESTAMP | auto_now_add                              |
+|    | updated_at | TIMESTAMP | auto_now                                  |
++-------------+--------------+---------------------------------------------+
+
+       ▲
+       │
+       │ *
+       │
+       ▼
+POST_LIKE (Junction Table)
++----------------+----------------+
+| PK | post_id    | FK → POST.id |
+| PK | user_id    | FK → USER.id |
+|    | created_at | TIMESTAMP     |
++----------------+----------------+
+
+FOLLOW
++----------------+----------------------------+
+| PK | id         | SERIAL                    |
+| FK | from_user  | INTEGER → USER.id         |
+| FK | to_user    | INTEGER → USER.id         |
+|    | created_at | TIMESTAMP                 |
++----------------+----------------------------+
+* Evitar duplicidade com constraint única (from_user, to_user)
+
 ```
 
 ### Diretórios

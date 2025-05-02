@@ -1,0 +1,5 @@
+{
+  "python.autoComplete.extraPaths": [
+    "./apps" // ou o caminho correto do diretório de seu projeto
+  ]
+}

@@ -1,3 +1,5 @@
+# The above class defines API views for following and unfollowing users, as well as listing users who are being followed and users who are followers.
+from django.core.cache import cache
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -11,6 +13,7 @@ from apps.follows.serializers import FollowSerializer
 class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Follow.objects.all()
+    
     def get_serializer_class(self):
         return FollowSerializer
 
@@ -34,6 +37,9 @@ class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
               {"error": "Você já está seguindo esse usuário."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
+          #Invalida o cache do feed do usuário que seguiu
+        cache.delete(f'user_feed_{request.user.id}')
 
         serializer = FollowSerializer(follow)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -45,6 +51,8 @@ class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
             followed_id=kwargs['pk']
         )
         follow.delete()
+         # Invalida o cache do feed do usuário que deixou de seguir
+        cache.delete(f'user_feed_{request.user.id}')
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class FollowingListView(generics.ListAPIView):

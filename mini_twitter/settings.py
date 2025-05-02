@@ -9,26 +9,22 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+from datetime import timedelta
 from pathlib import Path
 import environ
 import os
-env = environ.Env()
-environ.Env.read_env()
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = env('SECRET_KEY')
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+SECRET_KEY = env('SECRET_KEY')
 
-{
-    "python.analysis.extraPaths": [
-        "./venv/lib/python3.13/site-packages"
-    ],
-    "python.autoComplete.extraPaths": [
-        "./venv/lib/python3.13/site-packages"
-    ]
-}
+DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = ['*']
 
@@ -50,18 +46,33 @@ INSTALLED_APPS = [
     'apps.posts',
     'apps.follows',
     'apps.feeds',
+    'corsheaders',
 ]
 
 # Configurações adicionais
+# https://docs.djangoproject.com/en/5.2/ref/settings/#security-middleware
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# https://docs.djangoproject.com/en/5.2/ref/settings/#csrf-csrf-cookie
+CSRF_COOKIE_SECURE = True
+# https://docs.djangoproject.com/en/5.2/ref/settings/#session-cookie
+SESSION_COOKIE_SECURE = True
+# https://docs.djangoproject.com/en/5.2/ref/settings/#x-frame-options
+X_FRAME_OPTIONS = 'DENY'
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'Basic': {
-            'type': 'basic'
+        'Bearer': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer <JWT_TOKEN>"'
         }
-    }
+    },
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -70,17 +81,20 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+CORS_ALLOW_ALL_ORIGINS = True
+REACT_APP_DIR = os.path.join(BASE_DIR, 'frontend/build')
 
-# URL configuratio
+# Configuração do URL conf
 ROOT_URLCONF = 'mini_twitter.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(REACT_APP_DIR, 'build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -90,7 +104,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'mini_twitter.wsgi.application'
-# # LOGIN_URL = None
+
+# https://www.django-rest-framework.org/api-guide/settings/
+# Configuração do Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'mini_twitter.pagination.StandardResultsSetPagination',
@@ -102,6 +118,22 @@ REST_FRAMEWORK = {
     ),
 }
 
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
+# Configuração do JWT
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Diminui o tempo de expiração para melhorar segurança
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh token com validade maior
+    'ROTATE_REFRESH_TOKENS': True,  # Ativa a rotação dos refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,  # Desativa o token antigo após a rotação
+    'ALGORITHM': 'HS256',  # Usa o algoritmo HS256 para assinatura do token
+    'SIGNING_KEY': env('SECRET_KEY'),  # Usa a chave secreta definida no .env
+    'VERIFYING_KEY': None,  # Verificação de chave pública, não utilizada aqui
+    'AUTH_HEADER_TYPES': ('Bearer',),  # Tipo de cabeçalho HTTP utilizado para JWT
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),  # Define o tipo de token
+}
+
+# https://django-redis-cache.readthedocs.io/en/latest/
+# Configuração do cache com Redis
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -116,7 +148,21 @@ CACHES = {
         "KEY_PREFIX": "mini_twitter"
     }
 }
-AUTH_USER_MODEL = 'accounts.User'  # Defina explicitamente seu modelo de usuário
+
+# Celery Configuration
+CELERY_BROKER_URL = f'redis://{env("REDIS_HOST")}:{env("REDIS_PORT")}/0'
+CELERY_RESULT_BACKEND = 'django-db'
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/Sao_Paulo'
+
+
+AUTH_USER_MODEL = 'accounts.User'  # modelo de usuário
+
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# Configuração do banco de dados PostgreSQL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -127,6 +173,7 @@ DATABASES = {
         'PORT': env('POSTGRES_PORT', default='5432'),  # Porta padrão do PostgreSQL
     }
 }
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -141,6 +188,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -175,3 +225,11 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email settings no-reply
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')

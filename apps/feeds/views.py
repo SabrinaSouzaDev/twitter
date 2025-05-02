@@ -1,10 +1,9 @@
-from django.shortcuts import render
-
 from django.core.cache import cache
 from rest_framework import generics, permissions
-from posts.models import Post
-from posts.serializers import PostSerializer
+from apps.posts.models import Post
 from django.db.models import Q
+
+from apps.posts.serializers import PostSerializer
 
 class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -13,13 +12,15 @@ class FeedView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         cache_key = f'user_feed_{user.id}'
-        queryset = cache.get(cache_key)
+        post_ids = cache.get(cache_key)
 
-        if queryset is None:
+        if post_ids is None:
             following_ids = user.following.values_list('followed_id', flat=True)
             queryset = Post.objects.filter(
                 Q(author__id__in=following_ids) | Q(author=user)
             ).order_by('-created_at')
-            cache.set(cache_key, queryset, timeout=60 * 5)  # Cache for 5 minutes
+            
+            post_ids = list(queryset.values_list('id', flat=True))
+            cache.set(cache_key, post_ids, timeout=60 * 5)
 
-        return queryset
+        return Post.objects.filter(id__in=post_ids).order_by('-created_at')
