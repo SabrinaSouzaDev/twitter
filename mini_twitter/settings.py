@@ -9,10 +9,11 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import os
 from datetime import timedelta
 from pathlib import Path
 import environ
-import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,9 +25,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # SECURITY WARNING: don't run with debug turned on in production!
 SECRET_KEY = env('SECRET_KEY')
 
-DEBUG = env.bool('DEBUG', default=False)
-
 ALLOWED_HOSTS = ['*']
+
+DEBUG = env.bool('DEBUG', default=False)  # type: ignore
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'drf_yasg',
+    'django_celery_results',
      # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
@@ -104,6 +106,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'mini_twitter.wsgi.application'
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_twitter.settings")
+
 
 # https://www.django-rest-framework.org/api-guide/settings/
 # Configuração do Django REST Framework
@@ -149,7 +153,15 @@ CACHES = {
     }
 }
 
+CELERY_BEAT_SCHEDULE = {
+    'task_name': {
+        'task': 'path_to_your_task',
+        'schedule': 3600.0,  # Executar a tarefa a cada hora
+    },
+}
+
 # Celery Configuration
+# The `CELERY_BROKER_URL` setting in Django is used to specify the URL of the message broker that Celery will use to send and receive messages. In this case, the `CELERY_BROKER_URL` is set to a Redis broker URL.
 CELERY_BROKER_URL = f'redis://{env("REDIS_HOST")}:{env("REDIS_PORT")}/0'
 CELERY_RESULT_BACKEND = 'django-db'
 
@@ -166,11 +178,11 @@ AUTH_USER_MODEL = 'accounts.User'  # modelo de usuário
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB', default='mini_twitter_db'),  # Nome do banco de dados
-        'USER': env('POSTGRES_USER', default='sabrina'),  # Usuário do banco de dados
-        'PASSWORD': env('POSTGRES_PASSWORD', default='BackLog1023'),  # Senha
-        'HOST': env('POSTGRES_HOST', default='localhost'),  # Host (localhost ou IP)
-        'PORT': env('POSTGRES_PORT', default='5432'),  # Porta padrão do PostgreSQL
+        'NAME': env('POSTGRES_DB'),
+        'USER': env('POSTGRES_USER'),
+        'PASSWORD': env('POSTGRES_PASSWORD'),
+        'HOST': env('POSTGRES_HOST'),
+        'PORT': env('POSTGRES_PORT'),
     }
 }
 

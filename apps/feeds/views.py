@@ -2,20 +2,24 @@ from django.core.cache import cache
 from rest_framework import generics, permissions
 from apps.posts.models import Post
 from django.db.models import Q
-
 from apps.posts.serializers import PostSerializer
 
+
 class FeedView(generics.ListAPIView):
+    """
+    View para exibir o feed de posts do usuário, incluindo os posts do próprio
+    usuário e dos usuários que ele segue.
+    """
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        cache_key = f'user_feed_{user.id}'
+        cache_key = f'user_feed_{user.pk}'
         post_ids = cache.get(cache_key)
 
         if post_ids is None:
-            following_ids = user.following.values_list('followed_id', flat=True)
+            following_ids = user.following.values_list('followed_id', flat=True)  # type: ignore
             queryset = Post.objects.filter(
                 Q(author__id__in=following_ids) | Q(author=user)
             ).order_by('-created_at')

@@ -21,3 +21,4 @@ drf-spectacular
 django_redis
 Pillow
 django-ratelimit
+pylint-django

@@ -1,10 +1,13 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import Follow
+
+from apps.follows.models import Follow
+
 
 
 
 User = get_user_model()
+
 
 class FollowModelTest(TestCase):
     def setUp(self):
@@ -15,7 +18,7 @@ class FollowModelTest(TestCase):
         follow = Follow.objects.create(follower=self.user1, following=self.user2)
         self.assertEqual(Follow.objects.count(), 1)
         self.assertEqual(follow.follower, self.user1)
-        self.assertEqual(follow.following, self.user2)
+        self.assertEqual(follow.followed, self.user2)
 
     def test_cannot_follow_self(self):
         with self.assertRaises(Exception):

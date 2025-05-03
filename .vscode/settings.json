@@ -6,5 +6,15 @@
     },
     "cSpell.words": [
         "corsheaders"
-    ]
+    ],
+    "cSpell.ignoreRegExpList": [
+        "/\\w+\\.py/", // ignora palavras em nomes de arquivos .py
+        "/[A-Za-z0-9_]+\\.[A-Za-z0-9_]+/" // ignora palavras com pontos (como pacotes)
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.useLibraryCodeForTypes": true,
+    "python.analysis.indexing": true,
+    "python.analysis.autoImportCompletions": true,
 }
