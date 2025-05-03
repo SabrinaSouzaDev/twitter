@@ -30,8 +30,13 @@ class FrontendAppView(View):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('accounts/', include('apps.accounts.urls')),
+    # path('api/', include(router.urls)),
+      path('api/v1/', include([
+          path('', include(router.urls)),  # /api/v1/posts/...
+          path('accounts/', include('apps.accounts.urls')),  # /api/v1/accounts/...
+          path('follows/', include('apps.follows.urls')),  # /api/v1/follows/...
+          path('feeds/', include('apps.feeds.urls')),  # /api/v1/feeds/...
+      ])),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
 
     # Servindo o manifest.json diretamente da pasta build

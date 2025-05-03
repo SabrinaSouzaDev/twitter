@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api'; // axios configurado com baseURL
+import api from '../services/api';
 
 const Login = () => {
-    const [username, setUsername] = useState(''); // username, não email
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -12,16 +12,16 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await api.post('/api/v1/token/', {
+            const response = await api.post('/accounts/token/', {
                 username,
                 password,
             });
+            const { access, refresh } = response.data;
 
             localStorage.setItem('access', response.data.access);
             localStorage.setItem('refresh', response.data.refresh);
 
-            // Redireciona para a página desejada após login
-            navigate('/dashboard'); // ou /, ou /api/v1/swagger/
+            navigate('/http://localhost:8000/swagger/');
         } catch (err: any) {
             setError('Usuário ou senha inválidos');
         }
