@@ -57,6 +57,7 @@ services:
       - .:/app
     stdin_open: true
     tty: true
+    
 
 networks:
   twitter_network:

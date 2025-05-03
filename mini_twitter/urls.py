@@ -1,52 +1,43 @@
+import os
 from django.contrib import admin
+from django.urls import path, include, re_path
+from django.views.static import serve
+from django.views import View
+from django.http import HttpResponse
+from django.template.exceptions import TemplateDoesNotExist
 from django.shortcuts import render
-from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
 from apps.posts.views import PostViewSet
+from mini_twitter.docs.schema import schema_view
+from mini_twitter.settings import BASE_DIR
 
-
-
-def index(request):
-    return render(request, 'index.html')
-
-
-# Configurando o roteador para o PostViewSet
+# Roteador da API
 router = DefaultRouter()
 router.register(r'posts', PostViewSet, basename='post')
 
-# Definindo o schema para a documentação
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Mini Twitter API",
-        default_version='v1',
-        description="Documentação da API do projeto Mini Twitter. API de seguidores, usuários e autenticação JWT",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@minitwitter.local"),
-        license=openapi.License(name="MIT License"),
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),  # Permite que qualquer pessoa visualize a documentação
-)
+# View que renderiza o React index.html
+class FrontendAppView(View):
+    def get(self, request):
+        try:
+            return render(request, 'index.html')
+        except TemplateDoesNotExist:
+            return HttpResponse(
+                "index.html not found. Run `npm run build` in your React app.",
+                status=501,
+            )
+
 
 urlpatterns = [
-    path('', index, name='index'),
     path('admin/', admin.site.urls),
-    # URL para a documentação da API
-    path('api/v1/', include([
-        path('', include(router.urls)),
-            # Posts
-        path('posts/', include('apps.posts.urls')),
-            # Autenticação
-        path('accounts/', include('apps.accounts.urls')),
-            # Feeds
-        path('feeds/', include('apps.feeds.urls')),
-            # Follows
-        path('follows/', include('apps.follows.urls')),
-    ])),
-    # Swagger UI (documentação da API)
+    path('api/', include(router.urls)),
+    path('accounts/', include('apps.accounts.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
+
+    # Servindo o manifest.json diretamente da pasta build
+    re_path(r'^(?P<path>logo\d+\.png)$', serve, {
+        'document_root': os.path.join(BASE_DIR, 'frontend', 'build')
+    }),
+    # Qualquer outra rota vai pro index.html do React
+    re_path(r'^.*$', FrontendAppView.as_view(), name='home'),
 ]

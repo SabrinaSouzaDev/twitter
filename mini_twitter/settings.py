@@ -38,12 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'django_celery_results',
-     # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
     'django_redis',
-    # Local apps
+
     'apps.accounts',
     'apps.posts',
     'apps.follows',
@@ -70,10 +69,12 @@ SWAGGER_SETTINGS = {
             'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer <JWT_TOKEN>"'
         }
     },
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'USE_SESSION_AUTH': False,
+    # 'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -84,15 +85,29 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
-REACT_APP_DIR = os.path.join(BASE_DIR, 'frontend/build')
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Configuração do URL conf
 ROOT_URLCONF = 'mini_twitter.urls'
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+STATIC_URL = '/static/'
+
+REACT_APP_DIR = os.path.join(BASE_DIR, 'frontend', 'build')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend', 'build', 'static'),
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(REACT_APP_DIR, 'build')],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,7 +127,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_twitter.settings")
 # https://www.django-rest-framework.org/api-guide/settings/
 # Configuração do Django REST Framework
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'mini_twitter.pagination.StandardResultsSetPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -120,6 +135,24 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
 }
 
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
@@ -186,7 +219,7 @@ DATABASES = {
     }
 }
 
-
+# Configuração do diretório de mídia
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 os.makedirs(MEDIA_ROOT, exist_ok=True)
@@ -221,17 +254,6 @@ TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-os.makedirs(os.path.join(BASE_DIR, 'static'), exist_ok=True)
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

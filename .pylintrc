@@ -3,3 +3,6 @@ load-plugins=pylint_django
 
 [django]
 django-settings-module=mini_twitter.settings
+
+[MESSAGES CONTROL]
+disable = missing-class-docstring

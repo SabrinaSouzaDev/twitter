@@ -1,6 +1,6 @@
 from django.urls import path
 from apps.accounts.views import (
-    CustomTokenObtainPairView, 
+    CustomLoginView, 
     CustomTokenRefreshView,
     UserCreateView, 
     UserDetailView, 
@@ -15,10 +15,10 @@ urlpatterns = [
     path('me/', UserDetailView.as_view(), name='user-detail'),
 
     # Endpoint para login (obter o token JWT)
-    path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+   path('login-page/', CustomLoginView.as_view(), name='login_page'),
 
     # Endpoint para refresh do token JWT
-    path('api/accounts/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('accounts/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
 
     # Endpoint para acessar ou editar o perfil do usuário logado
     path('profile/', UserProfileView.as_view(), name='user_profile'),

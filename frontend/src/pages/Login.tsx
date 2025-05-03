@@ -1,45 +1,47 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Para redirecionar após login
-import api from '../services/api'; // Importando a instância do axios
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api'; // axios configurado com baseURL
 
 const Login = () => {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState(''); // username, não email
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const navigate = useNavigate();  // Usando o react-router-dom para redirecionar
+    const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
-            // Enviando as credenciais para o backend Django
-            const response = await api.post('/token/', { username: email, password });
+            const response = await api.post('/api/v1/token/', {
+                username,
+                password,
+            });
 
-            // Armazenando o token JWT no localStorage
-            localStorage.setItem('token', response.data.access);
+            localStorage.setItem('access', response.data.access);
+            localStorage.setItem('refresh', response.data.refresh);
 
-            // Redirecionando para a página principal (exemplo)
-            navigate('/');
+            // Redireciona para a página desejada após login
+            navigate('/dashboard'); // ou /, ou /api/v1/swagger/
         } catch (err: any) {
-            setError('Credenciais inválidas');
+            setError('Usuário ou senha inválidos');
         }
     };
 
     return (
-        <div>
+        <div style={{ maxWidth: '400px', margin: '0 auto' }}>
             <h2>Login</h2>
-            {error && <div style={{ color: 'red' }}>{error}</div>}
+            {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
             <form onSubmit={handleLogin}>
-                <div>
-                    <label>Email</label>
+                <div style={{ marginBottom: '1rem' }}>
+                    <label>Usuário</label>
                     <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         required
                     />
                 </div>
-                <div>
+                <div style={{ marginBottom: '1rem' }}>
                     <label>Senha</label>
                     <input
                         type="password"
@@ -48,7 +50,7 @@ const Login = () => {
                         required
                     />
                 </div>
-                <button type="submit">Entrar</button>
+                <button type="submit">Login</button>
             </form>
         </div>
     );

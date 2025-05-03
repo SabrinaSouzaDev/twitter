@@ -2,7 +2,6 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from celery import shared_task
 from apps.posts.models import Post, PostLike
 from apps.posts.serializers import PostSerializer
 from mini_twitter.pagination import StandardResultsSetPagination
@@ -17,8 +16,8 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
         
-    def send_email_to_followed_user(email, post_id):
-        print(f"Enviando email para {email} sobre o post {post_id}")
+    # def send_email_to_followed_user(email, post_id):
+    #     print(f"Enviando email para {email} sobre o post {post_id}")
     
     @action(detail=True, methods=['post', 'delete'])
     def like(self, request, pk=None):

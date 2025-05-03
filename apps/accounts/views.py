@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.contrib.auth.views import LoginView
 
 
 from apps.accounts.models import User
@@ -40,3 +41,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     
 class CustomTokenRefreshView(TokenRefreshView):
     pass
+
+class CustomLoginView(LoginView):
+    template_name = 'accounts/login.html'
