@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'bio', 'password')
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)  # Utiliza create_user para garantir que a senha seja criptografada
+        user = User.objects.create_user(**validated_data)
         return user
     
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { useNavigate, Link } from 'react-router-dom';
+import '../styles/login.css';
+import { login } from '../services/authService';
+
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -10,48 +12,55 @@ const Login = () => {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-
         try {
-            const response = await api.post('/accounts/token/', {
-                username,
-                password,
-            });
-            const { access, refresh } = response.data;
-
-            localStorage.setItem('access', response.data.access);
-            localStorage.setItem('refresh', response.data.refresh);
-
-            navigate('/http://localhost:8000/swagger/');
-        } catch (err: any) {
+            const { access, refresh } = await login(username, password);
+            localStorage.setItem('access', access);
+            localStorage.setItem('refresh', refresh);
+            navigate('/swagger');
+        } catch {
             setError('Usuário ou senha inválidos');
         }
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '0 auto' }}>
-            <h2>Login</h2>
-            {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-            <form onSubmit={handleLogin}>
-                <div style={{ marginBottom: '1rem' }}>
-                    <label>Usuário</label>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                    <label>Senha</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit">Login</button>
-            </form>
+        <div className="login-container">
+            <div className="login-card">
+                <h1 className="login-logo">MINI-TWITTER</h1>
+                <h2 className="login-title">Entrar na sua conta</h2>
+
+                {error && <div className="login-error">{error}</div>}
+
+                <form onSubmit={handleLogin} className="login-form">
+                    <div className="login-form-group">
+                        <label className="login-label">Usuário</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="login-input"
+                            required
+                        />
+                    </div>
+                    <div className="login-form-group">
+                        <label className="login-label">Senha</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="login-input"
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="login-button">Login</button>
+                </form>
+
+                <p className="login-signup-text">
+                    Não tem uma conta?{' '}
+                    <Link to="/Register" className="login-signup-link">
+                        Criar nova conta
+                    </Link>
+                </p>
+            </div>
         </div>
     );
 };
