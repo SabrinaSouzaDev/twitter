@@ -16,7 +16,7 @@ const Login = () => {
             const { access, refresh } = await login(username, password);
             localStorage.setItem('access', access);
             localStorage.setItem('refresh', refresh);
-            navigate('/swagger');
+            navigate('/swagger/');
         } catch {
             setError('Usuário ou senha inválidos');
         }

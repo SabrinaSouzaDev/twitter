@@ -1,4 +1,3 @@
-# The above class defines API views for following and unfollowing users, as well as listing users who are being followed and users who are followers.
 from django.core.cache import cache
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -8,6 +7,7 @@ from apps.accounts.models import User
 from apps.accounts.serializers import UserSerializer
 from apps.follows.models import Follow
 from apps.follows.serializers import FollowSerializer
+from apps.follows.tasks import send_follow_email
 
 
 class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
@@ -19,27 +19,25 @@ class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
 
     def create(self, request, *args, **kwargs):
         followed_id = request.data.get('user_id')
-        followed = get_object_or_404(User, pk=followed_id)
-        
+        followed = get_object_or_404(User, pk=followed_id)  
         if request.user == followed:
             return Response(
-                 {"error": "Você não pode seguir a si mesmo."},
+                {"error": "Você não pode seguir a si mesmo."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
         follow, created = Follow.objects.get_or_create(
             follower=request.user,
             followed=followed
         )
-        
         if not created:
             return Response(
-              {"error": "Você já está seguindo esse usuário."},
+                {"error": "Você já está seguindo esse usuário."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-          #Invalida o cache do feed do usuário que seguiu
+        # Invalida o cache do feed
         cache.delete(f'user_feed_{request.user.id}')
+        # Envia e-mail assíncrono
+        send_follow_email.delay(followed.email)
 
         serializer = FollowSerializer(follow)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -51,7 +49,6 @@ class FollowView(generics.CreateAPIView, generics.DestroyAPIView):
             followed_id=kwargs['pk']
         )
         follow.delete()
-         # Invalida o cache do feed do usuário que deixou de seguir
         cache.delete(f'user_feed_{request.user.id}')
         return Response(status=status.HTTP_204_NO_CONTENT)
 

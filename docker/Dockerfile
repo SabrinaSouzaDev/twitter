@@ -26,5 +26,4 @@ COPY . .
 EXPOSE 8000
 
 # Comando de produção (Gunicorn)
-ENV DJANGO_SETTINGS_MODULE=mini_twitter.settings
 CMD ["gunicorn", "mini_twitter.wsgi:application", "--bind", "0.0.0.0:8000"]

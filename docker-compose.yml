@@ -34,19 +34,20 @@ services:
       timeout: 3s
       retries: 5
 
-  web:
+  backend:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: web
+    command: gunicorn mini_twitter.wsgi:application --bind 0.0.0.0:8000
+    container_name: backend
     env_file: .env
+    ports:
+      - "${APP_PORT}:8000"
     depends_on:
       twitter_db:
         condition: service_healthy
       redis:
         condition: service_started
-    ports:
-      - "${APP_PORT}:8000"
     restart: unless-stopped
     environment:
       - DJANGO_SETTINGS_MODULE=mini_twitter.settings
@@ -58,6 +59,12 @@ services:
     stdin_open: true
     tty: true
     
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
 
 networks:
   twitter_network:

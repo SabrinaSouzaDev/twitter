@@ -1,6 +1,5 @@
 
-import api from './api';
-import apiA from './apistoken';
+import api, { apiPublic } from './api';
 
 interface LoginResponse {
   access: string;
@@ -8,7 +7,7 @@ interface LoginResponse {
 }
 
 export const login = async (username: string, password: string): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>('/accounts/token/', { username, password });
+  const response = await api.post<LoginResponse>('/auth/token/', { username, password });
   return response.data;
 };
 
@@ -18,6 +17,6 @@ export const register = async (data: {
   bio?: string;
   password: string;
 }) => {
-  const response = await apiA.post('/accounts/register/', data);
+  const response = await apiPublic.post('/auth/register/', data);
   return response.data;
 };

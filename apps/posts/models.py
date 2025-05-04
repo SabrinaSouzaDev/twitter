@@ -1,5 +1,10 @@
 from django.db import models
 from apps.accounts.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.cache import cache
+
+
 
 
 class Post(models.Model):
@@ -42,3 +47,8 @@ class PostLike(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['post', 'user'], name='unique_post_like')
         ]
+        
+@receiver(post_save, sender=Post)        
+def clear_feed_cache(sender, instance, **kwargs):
+    cache_key = f"user_feed_{instance.author.pk}"
+    cache.delete(cache_key)

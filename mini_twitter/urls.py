@@ -30,12 +30,12 @@ class FrontendAppView(View):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('api/', include(router.urls)),
+      # API V1
       path('api/v1/', include([
-          path('', include(router.urls)),  # /api/v1/posts/...
-          path('accounts/', include('apps.accounts.urls')),  # /api/v1/accounts/...
-          path('follows/', include('apps.follows.urls')),  # /api/v1/follows/...
-          path('feeds/', include('apps.feeds.urls')),  # /api/v1/feeds/...
+          path('', include(router.urls)),  # /api/v1/posts/ (list, create, like/unlike)
+          path('auth/', include('apps.accounts.urls')),  # CASE 1: auth endpoints
+          path('follows/', include('apps.follows.urls')),  # CASE 3: follow/unfollow
+          path('feeds/', include('apps.feeds.urls')),  # CASE 4: viewing feed
       ])),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
 
@@ -43,6 +43,6 @@ urlpatterns = [
     re_path(r'^(?P<path>logo\d+\.png)$', serve, {
         'document_root': os.path.join(BASE_DIR, 'frontend', 'build')
     }),
-    # Qualquer outra rota vai pro index.html do React
+    # React frontend fallback
     re_path(r'^.*$', FrontendAppView.as_view(), name='home'),
 ]
