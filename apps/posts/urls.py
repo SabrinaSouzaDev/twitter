@@ -1,11 +1,10 @@
 from django.urls import path
-from apps.posts.views import (
-    PostCreateView, PostViewSet, LikePostView, UnlikePostView
-)
+from apps.posts.views import PostCreateView, PostViewSet, PostSearchView, LikePostView, UnlikePostView
 
 urlpatterns = [
-    path('', PostViewSet.as_view(), name='feed'),
     path('create/', PostCreateView.as_view(), name='post-create'),
-    path('<int:post_id>/like/', LikePostView.as_view(), name='like-post'),
-    path('<int:post_id>/unlike/', UnlikePostView.as_view(), name='unlike-post'),
+    path('', PostViewSet.as_view(), name='post-list'),
+    path('search/', PostSearchView.as_view(), name='post-search'),  # Nova rota de busca
+    path('<int:post_id>/like/', LikePostView.as_view(), name='post-like'),
+    path('<int:post_id>/unlike/', UnlikePostView.as_view(), name='post-unlike'),
 ]
