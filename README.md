@@ -80,13 +80,7 @@ FOLLOW
 
 ### Diretórios
 
-- **src/controllers/**: Contém os controladores responsáveis por gerenciar as requisições e respostas.
-- **src/models/**: Contém os modelos de dados da aplicação.
-- **src/routes/**: Define as rotas da aplicação.
-- **src/services/**: Contém a lógica de negócios e serviços auxiliares.
-- **src/utils/**: Funções utilitárias reutilizáveis.
-- **tests/**: Testes automatizados para a aplicação.
-- **public/**: Arquivos estáticos como imagens, CSS e JavaScript.
+
 - **views/**: Templates de visualização para renderização no lado do servidor.
 
 ## Tecnologias Utilizadas
@@ -122,12 +116,38 @@ FOLLOW
 - Curtidas e comentários em tweets.
 - Seguir e deixar de seguir outros usuários.
 
-## Testes
+## Como Executar
 
-Para rodar os testes, utilize o comando:
-```bash
-npm test
-```
+1. Clone o repositório:
+    ```bash
+    git clone https://github.com/seu-usuario/mini_twitter.git
+    cd mini_twitter
+    ```
+
+2. Crie e ative um ambiente virtual:
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
+
+3. Instale as dependências:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4. Configure as variáveis de ambiente no arquivo `.env` (baseado em `.env.example` se houver).
+
+5. Execute as migrações do banco de dados:
+    ```bash
+    python manage.py migrate
+    ```
+
+6. Inicie o servidor de desenvolvimento:
+    ```bash
+    python manage.py runserver
+    ```
+
+7. Acesse a aplicação em `http://localhost:8000`.
 
 ## Contribuição
 

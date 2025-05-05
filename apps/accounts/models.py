@@ -1,12 +1,13 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 class User(AbstractUser):
     """
-    Representa um usuário customizado com informações adicionais como
-    biografia
+    Representa um usuário customizado com informações adicionais como biografia.
     """
     bio = models.TextField(blank=True)
+
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='custom_user_set',

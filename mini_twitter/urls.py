@@ -9,6 +9,7 @@ from django.shortcuts import render
 from apps.feeds.urls import urlpatterns as feeds_urls
 from apps.posts.urls import urlpatterns as posts_urls
 from rest_framework.routers import DefaultRouter
+from django.views.generic import TemplateView
 
 from apps.posts.views import PostViewSet
 
@@ -41,7 +42,7 @@ urlpatterns = [
           path('feeds/', include(feeds_urls)),  # CASE 4: viewing feed
       ])),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
-
+    path('swagger-ui', TemplateView.as_view(template_name='swagger-ui.html'), name='swagger-ui'),
     # Servindo o manifest.json diretamente da pasta build
     re_path(r'^(?P<path>logo\d+\.png)$', serve, {
         'document_root': os.path.join(BASE_DIR, 'frontend', 'build')

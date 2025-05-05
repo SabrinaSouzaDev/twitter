@@ -34,6 +34,7 @@ class PostSearchView(generics.ListAPIView):
         return queryset
 
 class PostViewSet(generics.ListAPIView):
+    queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
 

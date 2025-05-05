@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     'django_redis',
-
     'apps.accounts',
     'apps.posts',
     'apps.follows',
@@ -65,9 +64,9 @@ SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
             'type': 'apiKey',
-            'in': 'header',
             'name': 'Authorization',
-            'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer <JWT_TOKEN>"'
+            'in': 'header',
+            'description': 'Informe o token no formato: Bearer <seu_token_jwt>'
         }
     },
     # 'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -127,7 +126,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_twitter.settings")
 # https://www.django-rest-framework.org/api-guide/settings/
 # Configuração do Django REST Framework
 REST_FRAMEWORK = {
-    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'mini_twitter.pagination.StandardResultsSetPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -135,6 +134,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '1000/day',
+        'anon': '100/day',
+    }
 }
 
 LOGGING = {
@@ -163,7 +170,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,  # Ativa a rotação dos refresh tokens
     'BLACKLIST_AFTER_ROTATION': True,  # Desativa o token antigo após a rotação
     'ALGORITHM': 'HS256',  # Usa o algoritmo HS256 para assinatura do token
-    'SIGNING_KEY': env('SECRET_KEY'),  # Usa a chave secreta definida no .env
+    'SIGNING_KEY': os.environ.get('DJANGO_SECRET_KEY'),  # Usa a chave secreta definida no .env
     'VERIFYING_KEY': None,  # Verificação de chave pública, não utilizada aqui
     'AUTH_HEADER_TYPES': ('Bearer',),  # Tipo de cabeçalho HTTP utilizado para JWT
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),  # Define o tipo de token

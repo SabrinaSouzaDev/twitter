@@ -5,6 +5,7 @@ import { login } from '../services/authService';
 
 
 const Login = () => {
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -16,12 +17,13 @@ const Login = () => {
             const { access, refresh } = await login(username, password);
             localStorage.setItem('access', access);
             localStorage.setItem('refresh', refresh);
-            const access_token = access
-            navigate(`/swagger/?Bearer=${access_token}`);
+            const token_obtain_pair = `Bearer ${access}`;
+            navigate(`/swagger/?token=${encodeURIComponent(token_obtain_pair)}`);
         } catch {
             setError('Usuário ou senha inválidos');
         }
     };
+
 
     return (
         <div className="login-container">
