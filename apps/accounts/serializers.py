@@ -29,9 +29,13 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise ValidationError("Esse nome de usuário já está em uso.")
+        # Verifica se o nome de usuário foi alterado
+        if self.instance and self.instance.username != value:
+            if User.objects.filter(username=value).exists():
+                raise ValidationError("Esse nome de usuário já está em uso.")
+        
         return value
+
 
     def create(self, validated_data):
         password = validated_data.pop('password')
