@@ -14,9 +14,10 @@ const Login = () => {
         e.preventDefault();
         try {
             const { access, refresh } = await login(username, password);
-            localStorage.setItem('accessToken', access);
+            localStorage.setItem('access', access);
             localStorage.setItem('refresh', refresh);
-            navigate('/swagger/');
+            const access_token = access
+            navigate(`/swagger/?Bearer=${access_token}`);
         } catch {
             setError('Usuário ou senha inválidos');
         }

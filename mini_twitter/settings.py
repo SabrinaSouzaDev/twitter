@@ -127,7 +127,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_twitter.settings")
 # https://www.django-rest-framework.org/api-guide/settings/
 # Configuração do Django REST Framework
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'mini_twitter.pagination.StandardResultsSetPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',

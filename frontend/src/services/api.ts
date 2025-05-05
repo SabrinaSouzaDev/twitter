@@ -16,7 +16,7 @@ export const apiPublic = axios.create({
 
 const buscarPerfil = async () => {
   try {
-    const response = await api.get('/usuario/perfil/');
+    const response = await api.get('/auth/profile/');
     console.log('Perfil do usuário:', response.data);
   } catch (error) {
     console.error('Erro ao buscar perfil:', error);

@@ -8,10 +8,11 @@ schema_view = get_schema_view(
         default_version='v1',
         description="Documentação da API do projeto Mini Twitter. API de seguidores, usuários e autenticação JWT",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@minitwitter.local"),
+        contact=openapi.Contact(email="sabrina.tecnologia@outlook.com"),
         license=openapi.License(name="MIT License"),
     ),
     public=True,
     # permission_classes=(IsAuthenticated,),
     permission_classes=(AllowAny,),
+    authentication_classes=[],
 )
