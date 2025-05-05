@@ -1,9 +1,10 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.request import Request
 from typing import cast
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
 from apps.posts.models import Post, PostLike
@@ -12,9 +13,9 @@ from mini_twitter.pagination import StandardResultsSetPagination
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.select_related('author').all()
+    queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):

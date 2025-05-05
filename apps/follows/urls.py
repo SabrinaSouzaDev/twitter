@@ -2,6 +2,9 @@ from django.urls import path
 
 from apps.follows.views import FollowView, FollowersListView, FollowingListView
 
+
+
+
 urlpatterns = [
     path('', FollowView.as_view(), name='follow'),  # POST para seguir
     path('<int:pk>/', FollowView.as_view(), name='unfollow'),  # DELETE para deixar de seguir

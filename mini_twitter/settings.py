@@ -61,6 +61,7 @@ SESSION_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
 
 SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
     'SECURITY_DEFINITIONS': {
         'Bearer': {
             'type': 'apiKey',
@@ -69,7 +70,6 @@ SWAGGER_SETTINGS = {
             'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer <JWT_TOKEN>"'
         }
     },
-    'USE_SESSION_AUTH': False,
     # 'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
@@ -127,7 +127,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_twitter.settings")
 # https://www.django-rest-framework.org/api-guide/settings/
 # Configuração do Django REST Framework
 REST_FRAMEWORK = {
-    # # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'mini_twitter.pagination.StandardResultsSetPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -194,16 +194,11 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # Celery Configuration
-# The `CELERY_BROKER_URL` setting in Django is used to specify the URL of the message broker that Celery will use to send and receive messages. In this case, the `CELERY_BROKER_URL` is set to a Redis broker URL.
+
 CELERY_BROKER_URL = f'redis://{env("REDIS_HOST")}:{env("REDIS_PORT")}/0'
-CELERY_RESULT_BACKEND = 'django-db'
-
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'America/Sao_Paulo'
 
 
+print("CELERY_BROKER_URL:", CELERY_BROKER_URL)
 AUTH_USER_MODEL = 'accounts.User'  # modelo de usuário
 
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

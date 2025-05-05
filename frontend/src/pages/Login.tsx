@@ -14,7 +14,7 @@ const Login = () => {
         e.preventDefault();
         try {
             const { access, refresh } = await login(username, password);
-            localStorage.setItem('access', access);
+            localStorage.setItem('accessToken', access);
             localStorage.setItem('refresh', refresh);
             navigate('/swagger/');
         } catch {

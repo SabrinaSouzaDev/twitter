@@ -4,7 +4,7 @@ from django.db import models
 class User(AbstractUser):
     """
     Representa um usuário customizado com informações adicionais como
-    biografia e imagem de perfil.
+    biografia
     """
     bio = models.TextField(blank=True)
     groups = models.ManyToManyField(

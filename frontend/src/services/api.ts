@@ -14,17 +14,25 @@ export const apiPublic = axios.create({
   },
 });
 
+const buscarPerfil = async () => {
+  try {
+    const response = await api.get('/usuario/perfil/');
+    console.log('Perfil do usuário:', response.data);
+  } catch (error) {
+    console.error('Erro ao buscar perfil:', error);
+  }
+};
+
+
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;

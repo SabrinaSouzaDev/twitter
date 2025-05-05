@@ -1,6 +1,7 @@
 from django.core.cache import cache
-from rest_framework import generics, permissions
+from rest_framework import generics
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 
 from apps.posts.models import Post
 from apps.posts.serializers import PostSerializer
@@ -12,7 +13,7 @@ class FeedView(generics.ListAPIView):
     usuário e dos usuários que ele segue, com caching para performance.
     """
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
