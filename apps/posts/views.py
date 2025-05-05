@@ -1,73 +1,51 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from django.db.models import Q
-from rest_framework.request import Request
-from typing import cast
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-
-
+from rest_framework.views import APIView
 from apps.posts.models import Post, PostLike
 from apps.posts.serializers import PostSerializer
-from mini_twitter.pagination import StandardResultsSetPagination
+from apps.follows.models import Follow
+from django.core.cache import cache
 
-
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().order_by('-created_at')
+class PostCreateView(generics.CreateAPIView):
+    queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    pagination_class = StandardResultsSetPagination
-
-    def get_queryset(self):
-        request = cast(Request, self.request)
-        search = request.query_params.get('search')
-        queryset = Post.objects.select_related('author').all()
-        if search:
-            queryset = queryset.filter(
-                Q(content__icontains=search) |
-                Q(content__icontains=f'#{search}')
-            )
-        return queryset
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Atribui o usuário autenticado como autor
         serializer.save(author=self.request.user)
 
-    def get_serializer_context(self):
-        # Permite que o serializer tenha acesso ao request (para is_liked)
-        context = super().get_serializer_context()
-        context['request'] = self.request
-        return context
 
-    @action(detail=True, methods=['post', 'delete'])
-    def like(self, request, pk=None):
-        post = self.get_object()
+class PostViewSet(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-        if request.method == 'POST':
-            like, created = PostLike.objects.get_or_create(
-                post=post,
-                user=request.user
-            )
-            if not created:
-                return Response(
-                    {'error': 'Post already liked'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            return Response({
-                'status': 'liked',
-                'like_count': post.like_count
-            }, status=status.HTTP_201_CREATED)
+    def get_queryset(self):
+        user = self.request.user
+        cache_key = f"user_feed_{user.pk}"
+        cached = cache.get(cache_key)
 
-        elif request.method == 'DELETE':
-            try:
-                like = PostLike.objects.get(post=post, user=request.user)
-                like.delete()
-                return Response({
-                    'status': 'unliked',
-                    'like_count': post.like_count
-                }, status=status.HTTP_204_NO_CONTENT)
-            except PostLike.DoesNotExist:
-                return Response(
-                    {'error': 'Post not liked'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+        if cached is not None:
+            return cached
+
+        followed_ids = Follow.objects.filter(follower=user).values_list('followed_id', flat=True)
+        queryset = Post.objects.filter(author__id__in=followed_ids).select_related('author').prefetch_related('likes')
+        cache.set(cache_key, queryset, 120)  # cache de 2 minutos
+        return queryset
+
+
+class LikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, post_id):
+        post = generics.get_object_or_404(Post, id=post_id)
+        PostLike.objects.get_or_create(post=post, user=request.user)
+        return Response({'detail': 'Post curtido com sucesso.'}, status=status.HTTP_200_OK)
+
+
+class UnlikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, post_id):
+        post = generics.get_object_or_404(Post, id=post_id)
+        PostLike.objects.filter(post=post, user=request.user).delete()
+        return Response({'detail': 'Curtida removida com sucesso.'}, status=status.HTTP_200_OK)

@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from apps.accounts.serializers import PublicUserSerializer
 from apps.posts.models import Post
+from apps.accounts.serializers import PublicUserSerializer
 
-class PostSerializer(serializers.ModelSerializer):
+class FeedPostSerializer(serializers.ModelSerializer):
     author = PublicUserSerializer(read_only=True)
-    like_count = serializers.IntegerField(read_only=True)
+    like_count = serializers.IntegerField(read_only=True)  # Removido `source=`
     is_liked = serializers.SerializerMethodField()
 
     class Meta:
@@ -21,8 +21,3 @@ class PostSerializer(serializers.ModelSerializer):
         if user and user.is_authenticated:
             return obj.likes.filter(user=user).exists()
         return False
-
-    def create(self, validated_data):
-        # Adiciona o autor automaticamente ao validated_data
-        validated_data['author'] = self.context['request'].user
-        return super().create(validated_data)

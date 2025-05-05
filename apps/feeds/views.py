@@ -3,17 +3,24 @@ from rest_framework import generics
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 
+from apps.feeds.serializers import FeedPostSerializer
 from apps.posts.models import Post
-from apps.posts.serializers import PostSerializer
+from rest_framework.pagination import PageNumberPagination
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 
-class FeedView(generics.ListAPIView):
-    """
-    View para exibir o feed de posts do usuário, incluindo os posts do próprio
-    usuário e dos usuários que ele segue, com caching para performance.
-    """
-    serializer_class = PostSerializer
+class FeedPagination(PageNumberPagination):
+    page_size = 10  # Número de posts por página
+
+class UserFeedView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = FeedPostSerializer
+    pagination_class = FeedPagination
+    
+    @method_decorator(cache_page(60 * 15))  # Cache por 15 minutos
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
         user = self.request.user

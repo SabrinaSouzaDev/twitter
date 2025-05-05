@@ -6,9 +6,11 @@ from django.views import View
 from django.http import HttpResponse
 from django.template.exceptions import TemplateDoesNotExist
 from django.shortcuts import render
+from apps.feeds.urls import urlpatterns as feeds_urls
 from rest_framework.routers import DefaultRouter
 
 from apps.posts.views import PostViewSet
+
 from mini_twitter.docs.schema import schema_view
 from mini_twitter.settings import BASE_DIR
 
@@ -35,7 +37,7 @@ urlpatterns = [
           path('', include(router.urls)),  # /api/v1/posts/ (list, create, like/unlike)
           path('auth/', include('apps.accounts.urls')),  # CASE 1: auth endpoints
           path('follows/', include('apps.follows.urls')),  # CASE 3: follow/unfollow
-          path('feeds/', include('apps.feeds.urls')),  # CASE 4: viewing feed
+          path('feeds/', include(feeds_urls)),  # CASE 4: viewing feed
       ])),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
 

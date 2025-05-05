@@ -1,66 +1,58 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
-from apps.follows.models import Follow
-from apps.follows.serializers import FollowSerializer
-from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+from .models import Follow
+from .serializers import FollowSerializer
+from rest_framework.views import APIView
 
-from celery import shared_task
+User = get_user_model()
 
-
-# Função Celery para envio de e-mail quando alguém segue outro
-@shared_task
-def send_follow_email_task(follower_username, followed_email):
-    send_mail(
-        subject='Você ganhou um novo seguidor!',
-        message=f'{follower_username} começou a te seguir no Twitter Clone!',
-        from_email='no-reply@twitterclone.com',
-        recipient_list=[followed_email],
-        fail_silently=True,
-    )
-
-class FollowView(generics.CreateAPIView):
-    queryset = Follow.objects.all()
-    serializer_class = FollowSerializer
+class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
+    def post(self, request, user_id):
+        try:
+            to_follow = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Check if already following
-        follower = request.user
-        followed = serializer.validated_data['followed']
-        
-        # Verifica se o usuário já está seguindo o outro
-        if Follow.objects.filter(follower=follower, followed=followed).exists():
-            return Response({"detail": "Você já segue esse usuário."}, status=status.HTTP_400_BAD_REQUEST)
+        if to_follow == request.user:
+            return Response({'detail': 'Cannot follow yourself.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Cria o follow
-        self.perform_create(serializer)
-        
-        # Envia o e-mail de notificação ao usuário seguido
-        send_follow_email_task(follower.username, followed.email)
+        follow, created = Follow.objects.get_or_create(follower=request.user, followed=to_follow)
+        if not created:
+            return Response({'detail': 'Already following.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'detail': f'Now following {to_follow.username}.'}, status=status.HTTP_201_CREATED)
 
+class UnfollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
 
-# View para listar os seguidores de um usuário
-class FollowersListView(generics.ListAPIView):
+    def post(self, request, user_id):
+        try:
+            to_unfollow = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        deleted, _ = Follow.objects.filter(follower=request.user, followed=to_unfollow).delete()
+        if not deleted:
+            return Response({'detail': 'You are not following this user.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'detail': f'Unfollowed {to_unfollow.username}.'}, status=status.HTTP_200_OK)
+
+class ListFollowersView(generics.ListAPIView):
     serializer_class = FollowSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        return Follow.objects.filter(followed=user)
+        user_id = self.kwargs['user_id']
+        return Follow.objects.filter(followed__id=user_id)
 
-
-# View para listar os usuários que o usuário logado está seguindo
-class FollowingListView(generics.ListAPIView):
+class ListFollowingView(generics.ListAPIView):
     serializer_class = FollowSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        return Follow.objects.filter(follower=user)
+        user_id = self.kwargs['user_id']
+        return Follow.objects.filter(follower__id=user_id)

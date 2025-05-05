@@ -1,13 +1,14 @@
 from django.urls import path
-
-from apps.follows.views import FollowView, FollowersListView, FollowingListView
-
-
-
+from .views import (
+    FollowUserView,
+    UnfollowUserView,
+    ListFollowersView,
+    ListFollowingView,
+)
 
 urlpatterns = [
-    path('', FollowView.as_view(), name='follow'),  # POST para seguir
-    path('<int:pk>/', FollowView.as_view(), name='unfollow'),  # DELETE para deixar de seguir
-    path('following/', FollowingListView.as_view(), name='following-list'),
-    path('followers/', FollowersListView.as_view(), name='followers-list'),
+    path('follow/<int:user_id>/', FollowUserView.as_view(), name='follow-user'),
+    path('unfollow/<int:user_id>/', UnfollowUserView.as_view(), name='unfollow-user'),
+    path('<int:user_id>/followers/', ListFollowersView.as_view(), name='user-followers'),
+    path('<int:user_id>/following/', ListFollowingView.as_view(), name='user-following'),
 ]
