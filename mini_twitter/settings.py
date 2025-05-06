@@ -36,17 +36,26 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'drf_yasg',
-    'django_celery_results',
+    'simple_history',
+    'auditlog',
+    
+    # external
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
+    'drf_yasg',
+    'django_celery_results',
+    'drf_standardized_errors',
+    'corsheaders',
+    
+    # cash
     'django_redis',
+    
+    # application
     'apps.accounts',
     'apps.posts',
     'apps.follows',
     'apps.feeds',
-    'corsheaders',
 ]
 
 # Configurações adicionais
@@ -73,6 +82,8 @@ SWAGGER_SETTINGS = {
 }
 
 MIDDLEWARE = [
+    'auditlog.middleware.AuditlogMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -242,3 +253,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email settings no-reply
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
