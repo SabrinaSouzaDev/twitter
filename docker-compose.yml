@@ -16,55 +16,35 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
-
   redis:
     image: redis:alpine
-    container_name: redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     networks:
       - twitter_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
 
-  backend:
+  web:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    command: gunicorn mini_twitter.wsgi:application --bind 0.0.0.0:8000
-    container_name: backend
+    container_name: web
     env_file: .env
     ports:
       - "${APP_PORT}:8000"
+    networks:
+      - twitter_network
     depends_on:
       twitter_db:
         condition: service_healthy
       redis:
         condition: service_started
-    restart: unless-stopped
-    environment:
-      - DJANGO_SETTINGS_MODULE=mini_twitter.settings
-      - DEBUG=${DEBUG}
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/${POSTGRES_DB}
-      - REDIS_URL=redis://redis:6379/0
     volumes:
-      - .:/app
-    stdin_open: true
-    tty: true
+      - .:/app:z
     
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
 
 networks:
   twitter_network:
