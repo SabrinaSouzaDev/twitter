@@ -1,29 +1,28 @@
-# Docker/Dockerfile
 FROM python:3.11-slim
 
-# Configurações essenciais
-ENV DJANGO_SETTINGS_MODULE=mini_twitter.settings
-
-# Instala dependências de sistema necessárias
+# Instala dependências e cria um usuário não-root
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    && groupadd -r django && useradd -r -g django django \
+    && mkdir /app && chown django:django /app \
     && rm -rf /var/lib/apt/lists/*
 
-# Cria e define o diretório de trabalho
-RUN mkdir -p /app
 WORKDIR /app
-ENV PYTHONPATH "${PYTHONPATH}:/app"
-# Copia e instala dependências Python (otimizando cache)
-COPY requirements.txt .
+
+# Copia os arquivos com as permissões corretas
+COPY --chown=django:django requirements.txt .
+
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copia o projeto (contexto é o diretório onde docker-compose está)
-COPY . .
+COPY --chown=django:django . .
 
-# Porta do aplicativo
+USER django
+
+ENV PYTHONPATH=/app \
+    DJANGO_SETTINGS_MODULE=mini_twitter.settings
+
 EXPOSE 8000
 
-# Comando de produção (Gunicorn)
-CMD ["gunicorn", "mini_twitter.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
