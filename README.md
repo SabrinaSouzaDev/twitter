@@ -44,19 +44,19 @@ Projeto de rede social minimalista inspirado no Twitter. Permite autenticação 
     └── pyvenv.cfg
 ```
 
-DESCRIPTION
+### DESCRIÇÃO
 
-You are tasked with implementing a scalable REST API for a simple social media platform ("Mini-Twitter"), where users can:
+Tarefa é implementar uma API REST escalável para uma plataforma simples de mídia social ("Mini-Twitter"), onde os usuários podem:
 
-Register and authenticate themselves.
+- Registrar-se e autenticar-se.
 
-Create, edit, delete, and like posts.
+- Criar, editar, excluir e curtir posts.
 
-Follow and unfollow other users.
+- Seguir e deixar de seguir outros usuários.
 
-View their feed, which should display posts from the users they follow.
+- Visualizar seu feed, que deve exibir posts dos usuários que eles seguem.
 
-The project should demonstrate your ability to build a scalable, secure, and well-tested system using modern backend development practices.
+O projeto monstra a capacidade de construir um sistema escalável, seguro, utilizando práticas modernas de desenvolvimento de backend.
 
 
 
