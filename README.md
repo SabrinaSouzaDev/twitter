@@ -1,5 +1,7 @@
 # 🐦 Mini Twitter
 
+Application ID 86a83nfjn
+
 Projeto de rede social minimalista inspirado no Twitter. Permite autenticação de usuários, publicação de posts (tweets), curtidas, seguidores e geração de feed.
 
 ## 📁 Estrutura do Projeto
