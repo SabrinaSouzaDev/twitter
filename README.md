@@ -1,27 +1,62 @@
-# Mini Twitter
+# 🐦 Mini Twitter
 
-Este é um projeto simples que simula funcionalidades básicas de uma rede social como o Twitter.
+Projeto de rede social minimalista inspirado no Twitter. Permite autenticação de usuários, publicação de posts (tweets), curtidas, seguidores e geração de feed.
 
-## Estrutura do Projeto
+## 📁 Estrutura do Projeto
 
 ```
-mini-twitter/
-├── .github/workflows/       # CI/CD workflows (GitHub Actions)
-├── apps/                     # Main application code
-│   ├── accounts/            # User authentication app
-│   ├── posts/               # Posts functionality
-│   ├── feeds/               # Feed generation
-│   ├── core/                # Core configurations
-│   └── utils/               # Utility functions
-├── docker/                  # Docker configurations
-├── docs/                    # API documentation
-├── scripts/                 # Utility scripts
-├── tests/                   # Test cases
-├── docker-compose.yml       # Docker compose file
-├── Dockerfile               # Dockerfile
-├── requirements.txt         # Python dependencies
-└── README.md                # Project documentation
+.
+├── apps
+│   ├── accounts
+│   ├── feeds
+│   ├── follows
+│   ├── __init__.py
+│   ├── posts
+│   └── __pycache__
+├── cspell.json
+├── docker
+│   └── Dockerfile
+├── docker-compose.yml
+├── manage.py
+├── mini_twitter
+│   ├── asgi.py
+│   ├── docs
+│   ├── __init__.py
+│   ├── pagination.py
+│   ├── __pycache__
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── README.md
+├── requirements.txt
+├── setup.cfg
+├── staticfiles
+│   ├── admin
+│   ├── drf-yasg
+│   └── rest_framework
+└── venv
+    ├── bin
+    ├── include
+    ├── lib
+    ├── lib64 -> lib
+    └── pyvenv.cfg
 ```
+
+DESCRIPTION
+
+You are tasked with implementing a scalable REST API for a simple social media platform ("Mini-Twitter"), where users can:
+
+Register and authenticate themselves.
+
+Create, edit, delete, and like posts.
+
+Follow and unfollow other users.
+
+View their feed, which should display posts from the users they follow.
+
+The project should demonstrate your ability to build a scalable, secure, and well-tested system using modern backend development practices.
+
+
 
 ### Diagrama
 ```bash
@@ -78,78 +113,36 @@ FOLLOW
 
 ```
 
-### Diretórios
+## 🚀 Funcionalidades
+
+- Registro e login de usuários (autenticação via JWT)
+- Criação, visualização e edição de posts (tweets)
+- Curtidas em posts
+- Sistema de seguidores (follow/unfollow)
+- Feed cronológico dos usuários seguidos
+- Documentação da API via Swagger/OpenAPI (drf-spectacular)
+- Proteção com throttling, paginação e permissões
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Backend**: Django, Django REST Framework, Simple JWT
+- **Banco de Dados**: PostgreSQL
+- **Documentação da API**: drf-spectacular
+- **Containerização**: Docker & Docker Compose
+- **CI/CD**: GitHub Actions
 
 
-- **views/**: Templates de visualização para renderização no lado do servidor.
+⚙️ Como Executar
+✅ Usando Docker
+```bash
+git clone https://github.com/seu-usuario/mini_twitter.git
+cd mini_twitter
+cp .env.example .env
 
-## Tecnologias Utilizadas
+docker-compose up --build
+```
+Swagger: http://localhost:8000/swagger/
 
-- Django
-- Python
-- PostgreSQL
-- Docker
-- Docker-Compose
-
-## Como Executar
-
-1. Clone o repositório:
-    ```bash
-    git clone https://github.com/seu-usuario/mini_twitter.git
-    ```
-2. Instale as dependências:
-    ```bash
-    cd mini_twitter
-    npm install
-    ```
-3. Configure as variáveis de ambiente no arquivo `.env`.
-4. Inicie o servidor:
-    ```bash
-    npm start
-    ```
-5. Acesse a aplicação em `http://localhost:3000`.
-
-## Funcionalidades
-
-- Cadastro e login de usuários.
-- Publicação de tweets.
-- Curtidas e comentários em tweets.
-- Seguir e deixar de seguir outros usuários.
-
-## Como Executar
-
-1. Clone o repositório:
-    ```bash
-    git clone https://github.com/seu-usuario/mini_twitter.git
-    cd mini_twitter
-    ```
-
-2. Crie e ative um ambiente virtual:
-    ```bash
-    python -m venv venv
-    source venv/bin/activate
-    ```
-
-3. Instale as dependências:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4. Configure as variáveis de ambiente no arquivo `.env` (baseado em `.env.example` se houver).
-
-5. Execute as migrações do banco de dados:
-    ```bash
-    python manage.py migrate
-    ```
-
-6. Inicie o servidor de desenvolvimento:
-    ```bash
-    python manage.py runserver
-    ```
-
-7. Acesse a aplicação em `http://localhost:8000`.
-
-## Contribuição
 
 Contribuições são bem-vindas! Siga os passos abaixo:
 
