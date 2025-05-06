@@ -24,7 +24,7 @@ staticfiles/
 
 # Virtual environments
 venv/
-env/
+.env
 .venv/
 ENV/
 .ENV/
@@ -38,8 +38,6 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Tests
-htmlcov/
 .coverage
 coverage.xml
 .cache
