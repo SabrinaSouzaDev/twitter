@@ -6,4 +6,5 @@ class PostsConfig(AppConfig):
     name = 'apps.posts'
     
     def ready(self):
-        import apps.posts.signals  # noqa
+        from . import history_registry
+        

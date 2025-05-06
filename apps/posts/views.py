@@ -7,11 +7,15 @@ from apps.posts.serializers import PostSerializer
 from apps.follows.models import Follow
 from django.core.cache import cache
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 class PostCreateView(generics.CreateAPIView):
-    queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Post.objects.filter(deleted_at__isnull=True)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -74,3 +78,22 @@ class UnlikePostView(APIView):
         post = generics.get_object_or_404(Post, id=post_id)
         PostLike.objects.filter(post=post, user=request.user).delete()
         return Response({'detail': 'Curtida removida com sucesso.'}, status=status.HTTP_200_OK)
+    
+
+class PostDeleteView(generics.DestroyAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Post.objects.filter(deleted_at__isnull=True)
+
+    def delete(self, request, *args, **kwargs):
+        post = self.get_object()
+
+        if post.author != request.user:
+            return Response({'detail': 'Você não tem permissão para deletar este post.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        post.deleted_at = timezone.now()
+        post.save()
+        return Response({'detail': 'Post deletado com sucesso.'}, status=status.HTTP_204_NO_CONTENT)
