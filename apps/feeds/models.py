@@ -2,17 +2,17 @@ from django.db import models
 from django.conf import settings
 from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
-# from simple_history.models import HistoricalRecords
 
 class Feed(models.Model):
     history = AuditlogHistoryField()
-    # history = HistoricalRecords()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Feed'
         verbose_name_plural = 'Feeds'
+        
+auditlog.register(Feed)
 
 
 class FeedImage(models.Model):
@@ -24,3 +24,4 @@ class FeedImage(models.Model):
         verbose_name = 'Feed Image'
         verbose_name_plural = 'Feed Images'
         ordering = ['-created_at']
+        

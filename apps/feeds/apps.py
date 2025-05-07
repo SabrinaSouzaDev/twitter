@@ -5,5 +5,5 @@ class FeedsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.feeds'
     
-    # def ready(self):
-    #     import apps.feeds.signals
+    def ready(self):
+        from . import history_registry_feeds

@@ -11,7 +11,7 @@ from django.views.decorators.cache import cache_page
 
 
 class FeedPagination(PageNumberPagination):
-    page_size = 10  # Número de posts por página
+    page_size = 10
 
 class UserFeedView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]

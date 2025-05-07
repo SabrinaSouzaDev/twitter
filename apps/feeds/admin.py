@@ -3,9 +3,10 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 
-from apps.posts.models import Post
+from apps.feeds.models import Feed
 
 
-@admin.register(Post)
+
+@admin.register(Feed)
 class TweetAdmin(SimpleHistoryAdmin):
     pass
