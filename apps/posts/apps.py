@@ -6,5 +6,5 @@ class PostsConfig(AppConfig):
     name = 'apps.posts'
     
     def ready(self):
-        from . import history_registry
+        from . import history_registry_posts
         

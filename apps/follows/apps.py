@@ -6,4 +6,4 @@ class FollowsConfig(AppConfig):
     name = 'apps.follows'
 
     def ready(self):
-        from . import history_registry
+        from . import history_registry_follows

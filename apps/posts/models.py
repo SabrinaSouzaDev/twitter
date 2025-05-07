@@ -3,7 +3,6 @@ from apps.accounts.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.cache import cache
-# from simple_history.models import HistoricalRecords
 from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
 
@@ -11,7 +10,6 @@ from auditlog.models import AuditlogHistoryField
 
 class Post(models.Model):
     history = AuditlogHistoryField()
-    # history = HistoricalRecords()
     author = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
     content = models.TextField()
     image = models.ImageField(upload_to='posts/', null=True, blank=True)
@@ -35,6 +33,7 @@ class Post(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        
 auditlog.register(Post)
 
 class PostLike(models.Model):
@@ -53,7 +52,8 @@ class PostLike(models.Model):
             models.UniqueConstraint(fields=['post', 'user'], name='unique_post_like')
         ]
 
-auditlog.register(PostLike)      
+auditlog.register(PostLike)  
+
 @receiver(post_save, sender=Post)        
 def clear_feed_cache(sender, instance, **kwargs):
     cache_key = f"user_feed_{instance.author.pk}"

@@ -15,14 +15,14 @@ class FollowUserView(APIView):
         try:
             to_follow = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Usuario não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
         if to_follow == request.user:
-            return Response({'detail': 'Cannot follow yourself.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Você não pode se seguir.'}, status=status.HTTP_400_BAD_REQUEST)
 
         follow, created = Follow.objects.get_or_create(follower=request.user, followed=to_follow)
         if not created:
-            return Response({'detail': 'Already following.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Você já esta seguindo.'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'detail': f'Now following {to_follow.username}.'}, status=status.HTTP_201_CREATED)
 
