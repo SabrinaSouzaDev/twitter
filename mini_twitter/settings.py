@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'simple_history',
     'auditlog',
     
     # external
@@ -83,7 +82,6 @@ SWAGGER_SETTINGS = {
 
 MIDDLEWARE = [
     'auditlog.middleware.AuditlogMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
