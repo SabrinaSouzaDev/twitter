@@ -1,11 +1,11 @@
 from django.contrib.auth.models import AbstractUser
 from auditlog.registry import auditlog
-from auditlog.models import AuditlogHistoryField
+# from auditlog.models import AuditlogHistoryField
 from django.db import models
 
 
 class User(AbstractUser):
-    history = AuditlogHistoryField()
+    # history = AuditlogHistoryField()
     """
     Representa um usuário customizado com informações adicionais como biografia.
     """
