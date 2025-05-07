@@ -1,24 +1,27 @@
-# apps/posts/admin.py
 from django.contrib import admin
 from .models import Post, PostLike
-from auditlog.models import LogEntry
-from auditlog.admin import LogEntryAdmin
+
+class PostLikeInline(admin.TabularInline):
+    model = PostLike
+    extra = 0
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('author', 'content_snippet', 'created_at', 'updated_at')
-    search_fields = ('author__username', 'content')
-    list_filter = ('created_at',)
-
-    def content_snippet(self, obj):
-        return obj.content[:50]
-    content_snippet.short_description = 'Conteúdo'
+    list_display = ('id', 'author', 'content_short', 'created_at', 'like_count')
+    list_filter = ('created_at', 'author')
+    search_fields = ('content', 'author__username')
+    inlines = [PostLikeInline]
+    
+    def content_short(self, obj):
+        return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
+    content_short.short_description = 'Content'
+    
+    def like_count(self, obj):
+        return obj.likes.count()
+    like_count.short_description = 'Likes'
 
 @admin.register(PostLike)
 class PostLikeAdmin(admin.ModelAdmin):
-    list_display = ('post', 'user', 'created_at')
-    search_fields = ('post__content', 'user__username')
+    list_display = ('id', 'user', 'post', 'created_at')
     list_filter = ('created_at',)
-    
-admin.site.unregister(LogEntry)
-admin.site.register(LogEntry, LogEntryAdmin)
+    search_fields = ('user__username', 'post__content')

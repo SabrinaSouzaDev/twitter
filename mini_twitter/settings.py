@@ -122,6 +122,8 @@ TEMPLATES = [
     },
 ]
 
+
+
 WSGI_APPLICATION = 'mini_twitter.wsgi.application'
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_twitter.settings")
 
@@ -146,6 +148,23 @@ REST_FRAMEWORK = {
         'anon': '100/day',
     }
 }
+
+### CELERY.PY
+CELERY_BEAT_SCHEDULE = {
+    'task_name': {
+        'task': 'path_to_your_task',
+        'schedule': 3600.0,  # Executar a tarefa a cada hora
+    },
+}
+
+# Celery Configuration
+
+CELERY_BROKER_URL = f'redis://{env("REDIS_HOST")}:{env("REDIS_PORT")}/0'
+
+
+print("CELERY_BROKER_URL:", CELERY_BROKER_URL)
+
+### CELERY.PY
 
 LOGGING = {
     'version': 1,
