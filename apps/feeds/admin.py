@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Feed, FeedImage
 
+
 @admin.register(Feed)
 class FeedAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'created_at']

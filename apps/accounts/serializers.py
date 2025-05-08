@@ -73,11 +73,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
 
-        user: CustomUser = cast(CustomUser, self.user)  # Explicitly cast self.user to CustomUser
+        user: CustomUser = cast(CustomUser, self.user)
 
-        data.update({
+        data.update(**{
             'username': user.username,
             'email': user.email,
+            'Primeiro nome': user.first_name,
+            'Último nome': user.last_name,
+            'Permissões': [perm.codename for perm in user.user_permissions.all()],
+            'Grupos': [group.name for group in user.groups.all()],
         })
 
         return data
+    
