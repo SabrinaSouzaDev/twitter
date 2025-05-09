@@ -13,6 +13,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 import environ
+from celery.schedules import crontab
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,8 +124,6 @@ ROOT_URLCONF = 'mini_twitter.urls'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -175,7 +175,7 @@ REST_FRAMEWORK = {
 CELERY_BEAT_SCHEDULE = {
     'task_name': {
         'task': 'path_to_your_task',
-        'schedule': 3600.0,  # Executar a tarefa a cada hora
+        'schedule': crontab(minute=0, hour='*/1'),  # a cada 1 hora
     },
 }
 
@@ -183,8 +183,11 @@ CELERY_BEAT_SCHEDULE = {
 
 CELERY_BROKER_URL = f'redis://{env("REDIS_HOST")}:{env("REDIS_PORT")}/0'
 
-
 print("CELERY_BROKER_URL:", CELERY_BROKER_URL)
+
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 
 ### CELERY.PY
 
@@ -228,6 +231,7 @@ CACHES = {
         "LOCATION": f"redis://{env('REDIS_HOST')}:{env('REDIS_PORT')}/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # # "PASSWORD": env("REDIS_PASSWORD"),
             "SOCKET_CONNECT_TIMEOUT": 5,
             "SOCKET_TIMEOUT": 5,
             "IGNORE_EXCEPTIONS": True,
@@ -294,9 +298,14 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Email settings no-reply
+# Usa as variáveis
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env.int("EMAIL_PORT")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+
+# print("EMAIL_HOST:", env("EMAIL_HOST"))
+# print("EMAIL_PORT:", env("EMAIL_PORT"))
