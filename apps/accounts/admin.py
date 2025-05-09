@@ -22,7 +22,7 @@ class FollowingInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    pass  # Customize aqui se quiser
+    pass
     # list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
     # search_fields = ('username', 'email')
     # list_filter = ('is_staff', 'is_active')
