@@ -12,6 +12,7 @@ class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, user_id):
+        
         try:
             to_follow = User.objects.get(id=user_id)
         except User.DoesNotExist:

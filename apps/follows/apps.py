@@ -7,6 +7,7 @@ class FollowsConfig(AppConfig):
     
     
     def ready(self):
+        import apps.follows.signals
         from .models import Follow
         from auditlog.registry import auditlog
         auditlog.register(Follow)
