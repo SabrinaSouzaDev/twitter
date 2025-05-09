@@ -24,3 +24,4 @@ django-cors-headers
 django-celery-results
 django-simple-history
 django-auditlog
+drf-standardized-errors
