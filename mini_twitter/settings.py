@@ -16,18 +16,24 @@ import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+PATH_PREFIX = os.environ.get("PATH_PREFIX", "").strip("/")
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 # SECURITY WARNING: don't run with debug turned on in production!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.environ.get("DEBUG", "false").lower() == "true"
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", '').split(",")
+
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", '').split(",")
+
+CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", 'false') == 'true'
 
 ALLOWED_HOSTS = ['*']
-
-DEBUG = env.bool('DEBUG', default=False)  # type: ignore
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -67,39 +73,18 @@ SESSION_COOKIE_SECURE = True
 # https://docs.djangoproject.com/en/5.2/ref/settings/#x-frame-options
 X_FRAME_OPTIONS = 'DENY'
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header',
-            'description': 'Informe o token no formato: Bearer <token>'
-        }
-    },
-    'USE_SESSION_AUTH': False,
-    # 'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Sua API',
-    'DESCRIPTION': 'Descrição da API',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
-    'AUTHENTICATION_WHITELIST': [],
-    'SECURITY': [
-        {'BearerAuth': []},
-    ],
-    'COMPONENTS': {
-        'securitySchemes': {
-            'BearerAuth': {
-                'type': 'http',
-                'scheme': 'bearer',
-                'bearerFormat': 'JWT',
-            },
-        },
-    },
-}
+# SWAGGER_SETTINGS = {
+#     'SECURITY_DEFINITIONS': {
+#         'Bearer': {
+#             'type': 'apiKey',
+#             'name': 'Authorization',
+#             'in': 'header',
+#             'description': 'Informe o token no formato: Bearer <token>'
+#         }
+#     },
+#     'USE_SESSION_AUTH': False,
+#     # 'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+# }
 
 
 MIDDLEWARE = [
@@ -124,9 +109,39 @@ ROOT_URLCONF = 'mini_twitter.urls'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-STATIC_URL = '/static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+WSGI_APPLICATION = 'mini_twitter.wsgi.application'
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_twitter.settings")
+
+
+# https://www.django-rest-framework.org/api-guide/settings/
+# Configuração do Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'mini_twitter.pagination.StandardResultsSetPagination',
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+     'TEST_REQUEST_RENDERER_CLASSES': [
+        'rest_framework.renderers.MultiPartRenderer',
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '1000/day',
+        'anon': '100/day',
+    }
+}
 
 TEMPLATES = [
     {
@@ -144,67 +159,58 @@ TEMPLATES = [
     },
 ]
 
-
-WSGI_APPLICATION = 'mini_twitter.wsgi.application'
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_twitter.settings")
-
-
-# https://www.django-rest-framework.org/api-guide/settings/
-# Configuração do Django REST Framework
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_PAGINATION_CLASS': 'mini_twitter.pagination.StandardResultsSetPagination',
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.UserRateThrottle',
-        'rest_framework.throttling.AnonRateThrottle',
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Twitter API',
+    'DESCRIPTION': 'Twitter API v1 backend',
+     'VERSION': 'v1',
+    'OPERATION_ID_METHOD_POSITION': 'PRE',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PUBLIC': False,
+    'SCHEMA_PATH_PREFIX': f'/{PATH_PREFIX.replace("/", "")}/api/v1/',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    "SWAGGER_UI_SETTINGS": {
+        "displayOperationId": True,
+        "persistAuthorization": True,
+        "filter": True,
+    },
+    'REDOC_DIST': 'SIDECAR',
+    "POSTPROCESSING_HOOKS": [
+        "drf_standardized_errors.openapi_hooks.postprocess_schema_enums"
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'user': '1000/day',
-        'anon': '100/day',
-    }
-}
-
-### CELERY.PY
-CELERY_BEAT_SCHEDULE = {
-    'task_name': {
-        'task': 'path_to_your_task',
-        'schedule': 3600.0,  # Executar a tarefa a cada hora
+    "ENUM_NAME_OVERRIDES": {
+        "ValidationErrorEnum": "drf_standardized_errors.openapi_serializers.ValidationErrorEnum.choices",
+        "ClientErrorEnum": "drf_standardized_errors.openapi_serializers.ClientErrorEnum.choices",
+        "ServerErrorEnum": "drf_standardized_errors.openapi_serializers.ServerErrorEnum.choices",
+        "ErrorCode401Enum": "drf_standardized_errors.openapi_serializers.ErrorCode401Enum.choices",
+        "ErrorCode403Enum": "drf_standardized_errors.openapi_serializers.ErrorCode403Enum.choices",
+        "ErrorCode404Enum": "drf_standardized_errors.openapi_serializers.ErrorCode404Enum.choices",
+        "ErrorCode405Enum": "drf_standardized_errors.openapi_serializers.ErrorCode405Enum.choices",
+        "ErrorCode406Enum": "drf_standardized_errors.openapi_serializers.ErrorCode406Enum.choices",
+        "ErrorCode415Enum": "drf_standardized_errors.openapi_serializers.ErrorCode415Enum.choices",
+        "ErrorCode429Enum": "drf_standardized_errors.openapi_serializers.ErrorCode429Enum.choices",
+        "ErrorCode500Enum": "drf_standardized_errors.openapi_serializers.ErrorCode500Enum.choices",
     },
 }
 
-# Celery Configuration
-
-CELERY_BROKER_URL = f'redis://{env("REDIS_HOST")}:{env("REDIS_PORT")}/0'
-
-
-print("CELERY_BROKER_URL:", CELERY_BROKER_URL)
-
-### CELERY.PY
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'ERROR',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    },
-}
+# # LOGGING = {
+# #     'version': 1,
+# #     'disable_existing_loggers': False,
+# #     'handlers': {
+# #         'console': {
+# #             'level': 'ERROR',
+# #             'class': 'logging.StreamHandler',
+# #         },
+# #     },
+# #     'loggers': {
+# #         'django': {
+# #             'handlers': ['console'],
+# #             'level': 'ERROR',
+# #             'propagate': True,
+# #         },
+# #     },
+# # }
 
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
 # Configuração do JWT
@@ -239,23 +245,31 @@ CACHES = {
 
 AUTH_USER_MODEL = 'accounts.User'  # modelo de usuário
 
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# Configuração do banco de dados PostgreSQL
+DRF_STANDARDIZED_ERRORS = {
+    "ENABLE_IN_DEBUG_FOR_UNHANDLED_EXCEPTIONS": DEBUG,
+}
+
+# Server Gatway
+ASGI_APPLICATION = "core.asgi.application"
+
+# CORS
+CORS_ORIGIN_ALLOW_ALL = os.environ.get(
+    "CORS_ORIGIN_ALLOW_ALL",
+    False
+) == "true"
+
+# Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': env('POSTGRES_PORT'),
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST'),
+        'PORT': os.environ.get('POSTGRES_PORT'),
     }
 }
-
-# Configuração do diretório de mídia
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -280,23 +294,25 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Sao_Paulo'
+LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE')
+
+TIME_ZONE = os.environ.get('TZ', 'America/Belem')
+
 USE_I18N = True
-USE_L10N = True
+
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+STATIC_URL = f'{PATH_PREFIX}/static/' if PATH_PREFIX else 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = f'{PATH_PREFIX}/media/' if PATH_PREFIX else 'media/'
+
+
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Email settings no-reply
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
